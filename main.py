@@ -21,10 +21,16 @@ def main():
 
 	position = 0
 
+	if image.colortype != 2:
+		scanlineLength = image.width + 1
+	else:
+		scanlineLength = image.width * 3 + 1
+
 	for i in image.chunks:
 		if i.type() == 'IDAT':
 			for j in range(len(i.data)):
-				i.data[j] ^= pad[position]
+				if position % scanlineLength != 0:
+					i.data[j] ^= pad[position]
 				position += 1
 
 
