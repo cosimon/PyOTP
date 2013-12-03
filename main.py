@@ -1,18 +1,40 @@
 #!/usr/bin/env python3
 
 import sys
-
+from os import urandom
 from image import png
 
-if len(sys.argv) != 2:
-    print("ERROR: No filename provided!")
-    sys.exit(1)
+def main():
+	if len(sys.argv) != 2:
+		print("ERROR: No filename provided!")
+		sys.exit(1)
 
-image = png.parse(sys.argv[1])
+	image = png.parse(sys.argv[1])
 
-print(image)
+	print(image)
 
-for i in image.chunks:
-    print(i)
+	pad = bytearray()
 
-image.write_to_file("output.png")
+	for i in image.chunks:
+		if i.type() == 'IDAT':
+			pad += bytearray(urandom(len(i.data)))
+
+	position = 0
+
+	for i in image.chunks:
+		if i.type() == 'IDAT':
+			for j in range(len(i.data)):
+				i.data[j] ^= pad[position]
+				position += 1
+
+
+
+	image.write_to_file("output.png")
+
+	f = open('pad.txt', 'wb')
+	f.write(pad)
+	f.close()
+
+
+if __name__ == "__main__":
+	main()
